@@ -19,3 +19,9 @@ license-files = ["LICEN[CS]E*"]
 [project.urls]
 Homepage = "https://github.com/sipgate/sipgate-e2e-test-utils"
 Issues = "https://github.com/sipgate/sipgate-e2e-test-utils/issues"
+
+[tool.autopep8]
+max_line_length = 200
+
+[tool.ruff]
+line-length = 200
