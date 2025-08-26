@@ -1,1 +1,2 @@
+http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main
 pre-commit
