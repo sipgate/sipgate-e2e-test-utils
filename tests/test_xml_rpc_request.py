@@ -5,15 +5,15 @@ from sipgate_e2e_test_utils.xml_rpc import XmlRpcRequest
 
 
 class TestSipgateXmlRpcRequest(TestCase):
-    def test_empty_body(self) -> None:
+    def test_empty_body(self):
         with self.assertRaises(ParseError):
             XmlRpcRequest.parse('')
 
-    def test_non_xml_body(self) -> None:
+    def test_non_xml_body(self):
         with self.assertRaises(ParseError):
             XmlRpcRequest.parse("{'key': 'value'}")
 
-    def test_response_is_not_parsed_as_request(self) -> None:
+    def test_response_is_not_parsed_as_request(self):
         body = """<?xml version="1.0" encoding="UTF-8"?>
             <methodResponse>
                 <params><param><value>
@@ -27,7 +27,7 @@ class TestSipgateXmlRpcRequest(TestCase):
         with self.assertRaises(ValueError):
             XmlRpcRequest.parse(body)
 
-    def test_method_name(self) -> None:
+    def test_method_name(self):
         body = """<?xml version="1.0"?>
                     <methodCall>
                         <methodName>a_method_name</methodName>
@@ -37,7 +37,7 @@ class TestSipgateXmlRpcRequest(TestCase):
         parsed = XmlRpcRequest.parse(body)
         self.assertEqual('a_method_name', parsed.method_name)
 
-    def test_valid_members(self) -> None:
+    def test_valid_members(self):
         body = """<?xml version="1.0"?>
             <methodCall>
                 <methodName>a_method_name</methodName>
@@ -69,7 +69,7 @@ class TestSipgateXmlRpcRequest(TestCase):
         self.assertEqual(b'', parsed.members['base64_empty'])
         self.assertEqual(b'any_data', parsed.members['base64_data'])
 
-    def test_invalid_members(self) -> None:
+    def test_invalid_members(self):
         members = [
             {'name': 'bool_empty', 'value': '<boolean></boolean>'},
             {'name': 'bool_string', 'value': '<boolean>true</boolean>'},
@@ -92,7 +92,7 @@ class TestSipgateXmlRpcRequest(TestCase):
                 with self.assertRaises(ValueError):
                     XmlRpcRequest.parse(body)
 
-    def test_unsupported_data_type(self) -> None:
+    def test_unsupported_data_type(self):
         body = """<?xml version="1.0"?>
                     <methodCall>
                         <methodName>a_method_name</methodName>
@@ -106,7 +106,7 @@ class TestSipgateXmlRpcRequest(TestCase):
         with self.assertRaises(NotImplementedError):
             XmlRpcRequest.parse(body)
 
-    def test_has_string_representation(self) -> None:
+    def test_has_string_representation(self):
         body = """<?xml version="1.0"?>
             <methodCall>
                 <methodName>another_method_name</methodName>
@@ -122,7 +122,7 @@ class TestSipgateXmlRpcRequest(TestCase):
         self.assertIn('TNB', f"{parsed}")
         self.assertIn('D111', f"{parsed}")
 
-    def test_also_accepts_bytes(self) -> None:
+    def test_also_accepts_bytes(self):
         body = b"""<?xml version="1.0"?>
                     <methodCall>
                         <methodName>a_method_name</methodName>
@@ -131,7 +131,7 @@ class TestSipgateXmlRpcRequest(TestCase):
 
         XmlRpcRequest.parse(body)
 
-    def test_serialization_empty_request(self) -> None:
+    def test_serialization_empty_request(self):
         request = XmlRpcRequest('a_method', {})
 
         expected_body = """<?xml version="1.0"?>
@@ -143,7 +143,7 @@ class TestSipgateXmlRpcRequest(TestCase):
         # TODO: use better comparison, this would ignore spaces in values
         self.assertEqual(''.join(expected_body.split()), ''.join(request.serialize().split()))
 
-    def test_serialization(self) -> None:
+    def test_serialization(self):
         request = XmlRpcRequest('a_method', {
             'an_int': 42,
             'a_string': 'the_value',

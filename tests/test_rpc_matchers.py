@@ -8,7 +8,7 @@ from sipgate_e2e_test_utils.rpc_matchers import xml_rpc, json_rpc
 
 
 class TestSipgateRpcMatchers(TestCase):
-    def test_xml_rpc(self) -> None:
+    def test_xml_rpc(self):
         assertions = [
             (False, ('POST', '/jsonrpc', json.dumps({'method': 'test_method', 'version': '1.1', 'params': [], 'id': 42}).encode())),
             (False, ('POST', '/jsonrpc', b'<?xml version="1.0"?><methodCall><methodName>test_method</methodName><params><param><value></value></param></params></methodCall>')),
@@ -28,7 +28,7 @@ class TestSipgateRpcMatchers(TestCase):
 
                 self.assertEqual(expected, xml_rpc('test_method')(request))
 
-    def test_json_rpc(self) -> None:
+    def test_json_rpc(self):
         assertions = [
             (False, ('POST', '/rpc2', b'<?xml version="1.0"?><methodCall><methodName>test_method</methodName><params><param><value></value></param></params></methodCall>')),
             (False, ('POST', '/rpc2', json.dumps({'method': 'test_method', 'version': '1.1', 'params': [], 'id': 42}).encode())),

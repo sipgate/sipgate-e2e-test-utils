@@ -5,15 +5,15 @@ from sipgate_e2e_test_utils.xml_rpc import XmlRpcResponse
 
 
 class TestSipgateXmlRpcResponse(TestCase):
-    def test_empty_body(self) -> None:
+    def test_empty_body(self):
         with self.assertRaises(ParseError):
             XmlRpcResponse.parse('')
 
-    def test_non_xml_body(self) -> None:
+    def test_non_xml_body(self):
         with self.assertRaises(ParseError):
             XmlRpcResponse.parse("{'key': 'value'}")
 
-    def test_request_is_not_parsed_as_response(self) -> None:
+    def test_request_is_not_parsed_as_response(self):
         body = """<?xml version="1.0" encoding="UTF-8"?>
             <methodCall>
                 <methodName>another_method_name</methodName>
@@ -27,7 +27,7 @@ class TestSipgateXmlRpcResponse(TestCase):
         with self.assertRaises(ValueError):
             XmlRpcResponse.parse(body)
 
-    def test_parses_complex_success_response(self) -> None:
+    def test_parses_complex_success_response(self):
         body = """<?xml version="1.0"?>
             <methodResponse>
                 <params>
@@ -80,7 +80,7 @@ class TestSipgateXmlRpcResponse(TestCase):
             'number': '0777',
         }], parsed.members['blocks'])
 
-    def test_parses_complex_error_response(self) -> None:
+    def test_parses_complex_error_response(self):
         body = """<?xml version="1.0"?>
             <methodResponse>
                     <fault><value>
@@ -104,7 +104,7 @@ class TestSipgateXmlRpcResponse(TestCase):
         self.assertEqual((423, 'NOT_OK'), (parsed.fault_code, parsed.fault_string))
         self.assertTrue(['one', 'two'], parsed.members['things_that_went_wrong'])
 
-    def test_invalid_members(self) -> None:
+    def test_invalid_members(self):
         members = [
             {'name': 'bool_empty', 'value': '<boolean></boolean>'},
             {'name': 'bool_string', 'value': '<boolean>true</boolean>'},
@@ -126,7 +126,7 @@ class TestSipgateXmlRpcResponse(TestCase):
                 with self.assertRaises(ValueError):
                     XmlRpcResponse.parse(body)
 
-    def test_call_has_string_representation(self) -> None:
+    def test_call_has_string_representation(self):
         body = """<?xml version="1.0"?>
                     <methodResponse>
                         <params>
@@ -142,7 +142,7 @@ class TestSipgateXmlRpcResponse(TestCase):
         parsed = XmlRpcResponse.parse(body)
         self.assertRegex(f"{parsed}", '^<XmlRpcResponse.*faultCode.*200.*>$')
 
-    def test_serialization_success_response(self) -> None:
+    def test_serialization_success_response(self):
         response = XmlRpcResponse(200, 'OK')
 
         expected_body = """<?xml version="1.0"?>
@@ -161,7 +161,7 @@ class TestSipgateXmlRpcResponse(TestCase):
         #  this would ignore spaces in values and does not ignore order of params
         self.assertEqual(''.join(expected_body.split()), ''.join(response.serialize().split()))
 
-    def test_serialization_fault_response(self) -> None:
+    def test_serialization_fault_response(self):
         response = XmlRpcResponse(407, 'NOT SO OKAY')
 
         expected_body = """<?xml version="1.0"?>
@@ -178,7 +178,7 @@ class TestSipgateXmlRpcResponse(TestCase):
         #  this would ignore spaces in values and does not ignore order of params
         self.assertEqual(''.join(expected_body.split()), ''.join(response.serialize().split()))
 
-    def test_serialization(self) -> None:
+    def test_serialization(self):
         response = XmlRpcResponse(200, 'OK', {
             'an_int': 42,
             'a_string': 'the_value',
