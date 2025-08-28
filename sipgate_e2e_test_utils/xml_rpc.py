@@ -36,7 +36,7 @@ class XmlRpcResponse:
     """
     fault_code: int
     fault_string: str
-    members: dict[str, Any]
+    members: dict[str, Any] = field(default_factory=dict)
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} faultCode={self.fault_code} faultString={self.fault_string} members={self.members}>"
