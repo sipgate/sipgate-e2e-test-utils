@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added [http-request-recorder](https://github.com/sipgate/http-request-recorder) matchers for XML/JSON RPC requests (#5edb323).
 - added sipgate-flavoured XML RPC request/response parsing/serialization (#58f6a75).
 
+[1.2.0]: https://github.com/sipgate/http-request-recorder/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/sipgate/http-request-recorder/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sipgate/http-request-recorder/releases/tag/v1.0.0
 
