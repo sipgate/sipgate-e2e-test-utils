@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<collection version="0.01">
+
+    <!-- NAGIOS PING FUNCTION -->
+    <interface id="selfTest.testAll">
+        <description>veranlasst selbsttest und liefert fehler-/erfolgsprotokoll</description>
+        <input />
+        <output>
+            <scalar name="health" type="boolean" />
+            <array name="protocol">
+                <struct name="*">
+                    <scalar name="name" type="string" />
+                    <scalar name="exception" type="string" />
+                    <scalar name="success" type="boolean" />
+                    <scalar name="description" type="string" />
+                    <scalar name="critical" type="boolean" />
+                </struct>
+            </array>
+        </output>
+    </interface>
+
+    <interface id="daemon.shutdown">
+        <input />
+        <output />
+    </interface><interface id="daemon.uptime">
+    <input />
+    <output>
+        <struct name="uptime" optional="no">
+            <scalar name="seconds" type="int" optional="no" />
+        </struct>
+    </output>
+</interface><interface id="jobd.updateEvent">
+    <input>
+        <scalar name="systemName" type="string" optional="no" />
+        <scalar name="eventName" type="string" optional="no" />
+        <scalar name="uniqueid" type="string" optional="no" />
+        <scalar name="status" type="string" optional="no" />
+    </input>
+    <output />
+</interface><interface id="jobd.directTouch">
+    <input>
+        <scalar name="systemName" type="string" optional="no" />
+        <scalar name="uniqueid" type="string" optional="no" />
+        <scalar name="serviceIP" type="string" optional="yes" />
+    </input>
+    <output />
+</interface><interface id="jobd.listSystems">
+    <input>
+    </input>
+    <output>
+        <array name="systems" optional="no">
+            <scalar type="string" />
+        </array>
+    </output>
+</interface><interface id="jobd.listCriticalSystems">
+    <input>
+        <scalar type="boolean" name="confirmJobs" />
+    </input>
+    <output>
+        <struct name="systems" optional="no">
+            <struct name="*">
+                <array name="criticalJobs">
+                    <scalar type="string" />
+                </array>
+            </struct>
+        </struct>
+    </output>
+</interface></collection>
