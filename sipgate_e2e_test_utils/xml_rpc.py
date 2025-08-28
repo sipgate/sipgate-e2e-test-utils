@@ -45,6 +45,9 @@ class XmlRpcResponse:
     def parse(body: str | bytes) -> 'XmlRpcResponse':
         return _parse_xml_rpc_response(body)
 
+    def serialize(self) -> str:
+        return _serialize_xml_rpc_response(self)
+
 
 def _parse_xml_rpc_request(body: str | bytes) -> XmlRpcRequest:
     root = ElementTree.fromstring(body)
@@ -88,6 +91,23 @@ def _parse_xml_rpc_response(body: str | bytes) -> XmlRpcResponse:
 
     members = __parse_struct(value)
     return XmlRpcResponse(int(members.pop('faultCode')), str(members.pop('faultString')), members)
+
+
+def _serialize_xml_rpc_response(response: XmlRpcResponse) -> str:
+    params = dict(response.members, **{
+        'faultCode': response.fault_code,
+        'faultString': response.fault_string,
+    })
+
+    if response.fault_code == 200:
+        wrapper = '<params><param><value>{}</value></param></params>'
+    else:
+        wrapper = '<fault><value>{}</value></fault>'
+
+    return f"""<?xml version="1.0"?>
+            <methodResponse>
+                {wrapper.format(__serialize_struct(params))}
+            </methodResponse>"""
 
 
 def __parse_member(node: Element) -> tuple[str, Any]:

@@ -141,3 +141,77 @@ class TestSipgateXmlRpcResponse(TestCase):
 
         parsed = XmlRpcResponse.parse(body)
         self.assertRegex(f"{parsed}", '^<XmlRpcResponse.*faultCode.*200.*>$')
+
+    def test_serialization_success_response(self) -> None:
+        response = XmlRpcResponse(200, 'OK')
+
+        expected_body = """<?xml version="1.0"?>
+            <methodResponse>
+                <params>
+                    <param><value>
+                        <struct>
+                            <member><name>faultCode</name><value><i4>200</i4></value></member>
+                            <member><name>faultString</name><value><string>OK</string></value></member>
+                        </struct>
+                    </value></param>
+                </params>
+            </methodResponse>"""
+
+        # TODO: use better comparison
+        #  this would ignore spaces in values and does not ignore order of params
+        self.assertEqual(''.join(expected_body.split()), ''.join(response.serialize().split()))
+
+    def test_serialization_fault_response(self) -> None:
+        response = XmlRpcResponse(407, 'NOT SO OKAY')
+
+        expected_body = """<?xml version="1.0"?>
+            <methodResponse>
+                <fault><value>
+                    <struct>
+                        <member><name>faultCode</name><value><i4>407</i4></value></member>
+                        <member><name>faultString</name><value><string>NOT SO OKAY</string></value></member>
+                    </struct>
+                </value></fault>
+            </methodResponse>"""
+
+        # TODO: use better comparison
+        #  this would ignore spaces in values and does not ignore order of params
+        self.assertEqual(''.join(expected_body.split()), ''.join(response.serialize().split()))
+
+    def test_serialization(self) -> None:
+        response = XmlRpcResponse(200, 'OK', {
+            'an_int': 42,
+            'a_string': 'the_value',
+            'a_struct': {
+                'another_int': 23
+            },
+            'an_array': [{
+                'another_str': 'the_other_value'
+            }]
+        })
+
+        expected_body = """<?xml version="1.0"?>
+            <methodResponse>
+                <params><param><value>
+                    <struct>
+                        <member><name>an_int</name><value><i4>42</i4></value></member>
+                        <member><name>a_string</name><value><string>the_value</string></value></member>
+                        <member><name>a_struct</name><value><struct>
+                            <member><name>another_int</name><value><i4>23</i4></value></member>
+                        </struct></value></member>
+                        <member><name>an_array</name><value><array>
+                            <data>
+                                <value><struct>
+                                    <member><name>another_str</name><value><string>the_other_value</string></value></member>
+                                </struct></value>
+                            </data>
+                        </array></value></member>
+                        <member><name>faultCode</name><value><i4>200</i4></value></member>
+                        <member><name>faultString</name><value><string>OK</string></value></member>
+                    </struct>
+                </value></param></params>
+            </methodResponse>"""
+
+        # TODO: use better comparison
+        #  this would ignore spaces in values and does not ignore order of params
+        self.assertEqual(''.join(expected_body.split()), ''.join(response.serialize().split()))
