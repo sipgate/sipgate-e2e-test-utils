@@ -65,7 +65,7 @@ class TestSipgateXmlRpcResponse(TestCase):
 
         parsed = XmlRpcResponse.parse(body)
 
-        self.assertEqual((200, 'OK'), (parsed.fault_code, parsed.fault_string))
+        self.assertEqual((200, 'OK'), parsed.fault)
 
         self.assertEqual('', parsed.members['empty_string'])
         self.assertEqual('D146', parsed.members['tnb'])
@@ -101,7 +101,7 @@ class TestSipgateXmlRpcResponse(TestCase):
             </methodResponse>"""
 
         parsed = XmlRpcResponse.parse(body)
-        self.assertEqual((423, 'NOT_OK'), (parsed.fault_code, parsed.fault_string))
+        self.assertEqual((423, 'NOT_OK'), parsed.fault)
         self.assertTrue(['one', 'two'], parsed.members['things_that_went_wrong'])
 
     def test_invalid_members(self):
@@ -140,10 +140,10 @@ class TestSipgateXmlRpcResponse(TestCase):
                     </methodResponse>"""
 
         parsed = XmlRpcResponse.parse(body)
-        self.assertRegex(f"{parsed}", '^<XmlRpcResponse.*faultCode.*200.*>$')
+        self.assertRegex(f"{parsed}", '^<XmlRpcResponse.*fault.*200.*OK.*>$')
 
     def test_serialization_success_response(self):
-        response = XmlRpcResponse(200, 'OK')
+        response = XmlRpcResponse((200, 'OK'))
 
         expected_body = """<?xml version="1.0"?>
             <methodResponse>
@@ -162,7 +162,7 @@ class TestSipgateXmlRpcResponse(TestCase):
         self.assertEqual(''.join(expected_body.split()), ''.join(response.serialize().split()))
 
     def test_serialization_fault_response(self):
-        response = XmlRpcResponse(407, 'NOT SO OKAY')
+        response = XmlRpcResponse((407, 'NOT SO OKAY'))
 
         expected_body = """<?xml version="1.0"?>
             <methodResponse>
@@ -179,7 +179,7 @@ class TestSipgateXmlRpcResponse(TestCase):
         self.assertEqual(''.join(expected_body.split()), ''.join(response.serialize().split()))
 
     def test_serialization(self):
-        response = XmlRpcResponse(200, 'OK', {
+        response = XmlRpcResponse((200, 'OK'), {
             'an_int': 42,
             'a_string': 'the_value',
             'a_struct': {

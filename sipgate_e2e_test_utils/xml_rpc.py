@@ -34,12 +34,11 @@ class XmlRpcResponse:
     - double
     - datetime.iso8601
     """
-    fault_code: int
-    fault_string: str
+    fault: tuple[int, str]
     members: dict[str, Any] = field(default_factory=dict)
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} faultCode={self.fault_code} faultString={self.fault_string} members={self.members}>"
+        return f"<{self.__class__.__name__} fault={self.fault} members={self.members}>"
 
     @staticmethod
     def parse(body: str | bytes) -> 'XmlRpcResponse':
@@ -90,16 +89,18 @@ def _parse_xml_rpc_response(body: str | bytes) -> XmlRpcResponse:
         raise ValueError("Expecting to find a value")
 
     members = __parse_struct(value)
-    return XmlRpcResponse(int(members.pop('faultCode')), str(members.pop('faultString')), members)
+    fault = (int(members.pop('faultCode')), str(members.pop('faultString')))
+    return XmlRpcResponse(fault, members)
 
 
 def _serialize_xml_rpc_response(response: XmlRpcResponse) -> str:
+    (fault_code, fault_string) = response.fault
     params = dict(response.members, **{
-        'faultCode': response.fault_code,
-        'faultString': response.fault_string,
+        'faultCode': fault_code,
+        'faultString': fault_string,
     })
 
-    if response.fault_code == 200:
+    if fault_code == 200:
         wrapper = '<params><param><value>{}</value></param></params>'
     else:
         wrapper = '<fault><value>{}</value></fault>'
