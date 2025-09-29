@@ -37,15 +37,15 @@ class XmlRpcResponse:
     fault: tuple[int, str]
     members: dict[str, Any] = field(default_factory=dict)
 
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} fault={self.fault} members={self.members}>"
-
     @staticmethod
     def parse(body: str | bytes) -> 'XmlRpcResponse':
         return _parse_xml_rpc_response(body)
 
     def serialize(self) -> str:
         return _serialize_xml_rpc_response(self)
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} fault={self.fault} members={self.members}>"
 
 
 def _parse_xml_rpc_request(body: str | bytes) -> XmlRpcRequest:

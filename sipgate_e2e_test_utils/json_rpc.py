@@ -96,9 +96,6 @@ class JsonRpcResponse:
     def error(fault_code: int, fault_string: str, version: JsonRpcVersion | None = None, id: str | None = None) -> 'JsonRpcResponse':
         return JsonRpcResponse(JsonRpcResponseType.ERROR, (fault_code, fault_string), {}, version, id)
 
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} type={self.type} fault={self.fault} members={self.members} version='{self.version}' id='{self.id}'>"
-
     @staticmethod
     def parse(body: str | bytes) -> 'JsonRpcResponse':
         parsed = json.loads(body)
@@ -154,6 +151,9 @@ class JsonRpcResponse:
 
     def serialize(self) -> str:
         return json.dumps(self.json())
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} type={self.type} fault={self.fault} members={self.members} version='{self.version}' id='{self.id}'>"
 
 
 def _parse_version(version: str) -> JsonRpcVersion:
