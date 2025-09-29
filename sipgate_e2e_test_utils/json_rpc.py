@@ -43,7 +43,7 @@ class JsonRpcRequest:
         except KeyError:
             raise ValueError('invalid JSON RPC request, missing one of `method`, `params`, `id` or `jsonrpc`')
 
-        if type(method_name) is str or method_name == '':
+        if type(method_name) is not str or method_name == '':
             raise ValueError('expect `method` to be a non-empty string')
 
         version = _parse_version(version_str)
