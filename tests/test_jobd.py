@@ -48,7 +48,7 @@ class MockService:
 
         create_task(self.__send_result_to_jobd_after_some_time(xml_rpc_request.members['notificationUrl']))
 
-        return web.Response(status=200, body=XmlRpcResponse(200, 'OK', {}).serialize())
+        return web.Response(status=200, body=XmlRpcResponse.result(200, 'OK').serialize())
 
     async def __send_result_to_jobd_after_some_time(self, notification_url: str):
         await asyncio.sleep(0.25)

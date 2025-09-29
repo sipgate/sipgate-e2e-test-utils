@@ -29,7 +29,7 @@ class JobD:
 
     async def trigger_job_and_record_answer(self, job_name: str, timeout: int = 10) -> bytes:
         expectation = self.recorder.expect(
-            xml_rpc('jobd.updateEvent'), responses=XmlRpcResponse(200, 'ok').serialize(), timeout=timeout)
+            xml_rpc('jobd.updateEvent'), responses=XmlRpcResponse.result(200, 'ok').serialize(), timeout=timeout)
 
         response = await self.session.post(self.system_url, data=XmlRpcRequest('cron.triggerJob', {
             'jobName': job_name,
