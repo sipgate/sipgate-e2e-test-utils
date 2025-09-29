@@ -1,5 +1,6 @@
 import base64
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, Callable
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
@@ -27,6 +28,11 @@ class XmlRpcRequest:
         return _serialize_xml_rpc_request(self)
 
 
+class XmlRpcResponseType(Enum):
+    RESULT = 'result'
+    ERROR = 'error'
+
+
 @dataclass
 class XmlRpcResponse:
     """
@@ -34,8 +40,17 @@ class XmlRpcResponse:
     - double
     - datetime.iso8601
     """
+    type: XmlRpcResponseType
     fault: tuple[int, str]
-    members: dict[str, Any] = field(default_factory=dict)
+    members: dict[str, Any]
+
+    @staticmethod
+    def result(fault_code: int, fault_string: str, members: dict[str, Any] | None = None) -> 'XmlRpcResponse':
+        return XmlRpcResponse(XmlRpcResponseType.RESULT, (fault_code, fault_string), members if members else {})
+
+    @staticmethod
+    def error(fault_code: int, fault_string: str) -> 'XmlRpcResponse':
+        return XmlRpcResponse(XmlRpcResponseType.ERROR, (fault_code, fault_string), {})
 
     @staticmethod
     def parse(body: str | bytes) -> 'XmlRpcResponse':
@@ -81,8 +96,10 @@ def _parse_xml_rpc_response(body: str | bytes) -> XmlRpcResponse:
     if root.tag != 'methodResponse':
         raise ValueError("Expecting root tag to be '<methodResponse>'")
 
+    response_type = XmlRpcResponseType.RESULT
     value = root.find('params/param/value/struct')
     if value is None:
+        response_type = XmlRpcResponseType.ERROR
         value = root.find('fault/value/struct')
 
     if value is None:
@@ -90,7 +107,7 @@ def _parse_xml_rpc_response(body: str | bytes) -> XmlRpcResponse:
 
     members = __parse_struct(value)
     fault = (int(members.pop('faultCode')), str(members.pop('faultString')))
-    return XmlRpcResponse(fault, members)
+    return XmlRpcResponse(response_type, fault, members)
 
 
 def _serialize_xml_rpc_response(response: XmlRpcResponse) -> str:
@@ -100,7 +117,7 @@ def _serialize_xml_rpc_response(response: XmlRpcResponse) -> str:
         'faultString': fault_string,
     })
 
-    if fault_code == 200:
+    if response.type == XmlRpcResponseType.RESULT:
         wrapper = '<params><param><value>{}</value></param></params>'
     else:
         wrapper = '<fault><value>{}</value></fault>'
