@@ -1,20 +1,20 @@
 import json
 from unittest import TestCase
 
-from sipgate_e2e_test_utils.json_rpc import JsonRpcRequest, JsonRpcVersion
+from sipgate_e2e_test_utils.json_rpc import JsonRpcRequest, JsonRpcVersion, ParseError
 
 
 class TestJsonRpcRequest(TestCase):
     def test_parse_fails_empty_body(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse('')
 
     def test_parse_fails_non_json_body(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse('<methodCall></methodCall>')
 
     def test_parse_fails_missing_version(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'id': '42',
                 'method': 'a_method_name',
@@ -22,7 +22,7 @@ class TestJsonRpcRequest(TestCase):
             }))
 
     def test_parse_fails_invalid_version(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '4.2',
                 'id': '42',
@@ -31,7 +31,7 @@ class TestJsonRpcRequest(TestCase):
             }))
 
     def test_parse_fails_missing_id(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '1.1',
                 'method': 'a_method_name',
@@ -39,7 +39,7 @@ class TestJsonRpcRequest(TestCase):
             }))
 
     def test_parse_fails_missing_method_name(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '1.1',
                 'id': '42',
@@ -47,7 +47,7 @@ class TestJsonRpcRequest(TestCase):
             }))
 
     def test_parse_fails_empty_method_name(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '1.1',
                 'id': '42',
@@ -56,7 +56,7 @@ class TestJsonRpcRequest(TestCase):
             }))
 
     def test_parse_fails_non_string_method_name(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '1.1',
                 'id': '42',
@@ -65,14 +65,14 @@ class TestJsonRpcRequest(TestCase):
             }))
 
     def test_parse_fails_missing_params(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '1.1',
                 'id': '42',
             }))
 
     def test_parse_fails_empty_params_1_1(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '1.1',
                 'id': '42',
@@ -94,7 +94,7 @@ class TestJsonRpcRequest(TestCase):
         self.assertEqual({}, request.params)
 
     def test_parse_fails_empty_params_2_0(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
                 'jsonrpc': '2.0',
                 'id': '42',

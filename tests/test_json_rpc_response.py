@@ -1,7 +1,7 @@
 import json
 from unittest import TestCase
 
-from sipgate_e2e_test_utils.json_rpc import JsonRpcResponse, JsonRpcVersion, JsonRpcResponseType
+from sipgate_e2e_test_utils.json_rpc import JsonRpcResponse, JsonRpcVersion, JsonRpcResponseType, ParseError
 
 
 class TestJsonRpcResponse(TestCase):
@@ -37,28 +37,28 @@ class TestJsonRpcResponse(TestCase):
         self.assertIsNone(response.id)
 
     def test_parse_fails_empty_body(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcResponse.parse('')
 
     def test_parse_fails_non_json_body(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcResponse.parse('not_json')
 
     def test_parse_fails_neither_result_or_error_present(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcResponse.parse(json.dumps({
                 'id': '42',
             }))
 
     def test_parse_fails_invalid_version(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcResponse.parse(json.dumps({
                 'version': '4.2',
                 'result': _fault(200, '')
             }))
 
     def test_parse_fails_both_result_and_error_present(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             JsonRpcResponse.parse(json.dumps({
                 'result': _fault(200, ''),
                 'error': _fault(400, '')
@@ -66,14 +66,14 @@ class TestJsonRpcResponse(TestCase):
 
     def test_parse_fails_no_fault_code_present(self):
         for response_type in ['result', 'error']:
-            with (self.subTest(response_type), self.assertRaises(ValueError)):
+            with (self.subTest(response_type), self.assertRaises(ParseError)):
                 JsonRpcResponse.parse(json.dumps({
                     response_type: {},
                 }))
 
     def test_parse_fails_non_int_fault_code_in_result(self):
         for response_type in ['result', 'error']:
-            with (self.subTest(response_type), self.assertRaises(ValueError)):
+            with (self.subTest(response_type), self.assertRaises(ParseError)):
                 JsonRpcResponse.parse(json.dumps({
                     response_type: {
                         'faultCode': 'non_int'
@@ -82,7 +82,7 @@ class TestJsonRpcResponse(TestCase):
 
     def test_parse_fails_non_string_fault_string(self):
         for response_type in ['result', 'error']:
-            with (self.subTest(response_type), self.assertRaises(ValueError)):
+            with (self.subTest(response_type), self.assertRaises(ParseError)):
                 JsonRpcResponse.parse(json.dumps({
                     response_type: {
                         'faultCode': 200,

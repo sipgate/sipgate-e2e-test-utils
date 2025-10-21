@@ -2,7 +2,13 @@ import json
 import uuid
 from dataclasses import dataclass
 from enum import Enum
+from json import JSONDecodeError
 from typing import Any
+
+
+class ParseError(SyntaxError):
+    """An error when parsing a JSON-RPC body."""
+    pass
 
 
 class JsonRpcVersion(Enum):
@@ -33,7 +39,10 @@ class JsonRpcRequest:
 
     @staticmethod
     def parse(body: str | bytes) -> 'JsonRpcRequest':
-        parsed = json.loads(body)
+        try:
+            parsed = json.loads(body)
+        except JSONDecodeError:
+            raise ParseError(f'{body=} must be valid JSON')
 
         try:
             method_name = parsed['method']
@@ -41,18 +50,18 @@ class JsonRpcRequest:
             version_str = parsed['jsonrpc']
             id = parsed['id']
         except KeyError:
-            raise ValueError('invalid JSON RPC request, missing one of `method`, `params`, `id` or `jsonrpc`')
+            raise ParseError(f'{body=} must contain keys `method`, `params`, `id` and `jsonrpc`')
 
         if type(method_name) is not str or method_name == '':
-            raise ValueError('expect `method` to be a non-empty string')
+            raise ParseError(f'{method_name=} must be non-empty string')
 
         version = _parse_version(version_str)
 
         if version == JsonRpcVersion.V11 and params is None:
-            raise ValueError('unexpected <null> value for `params` using json RPC V1.1')
+            raise ParseError(f'{params=} must NOT be <null> when using JSON-RPC V1.1')
 
         if version == JsonRpcVersion.V20 and params == {}:
-            raise ValueError('unexpected empty object value for `params` using json RPC V2.0')
+            raise ParseError(f'{params=} must NOT be an empty object when using JSON-RPC V2.0')
 
         return JsonRpcRequest(version, method_name, params, id)
 
@@ -98,7 +107,10 @@ class JsonRpcResponse:
 
     @staticmethod
     def parse(body: str | bytes) -> 'JsonRpcResponse':
-        parsed = json.loads(body)
+        try:
+            parsed = json.loads(body)
+        except JSONDecodeError:
+            raise ParseError(f'{body=} must be valid JSON')
 
         id = parsed['id'] if 'id' in parsed else None
         version = _parse_version(parsed['version']) if 'version' in parsed else None
@@ -107,23 +119,23 @@ class JsonRpcResponse:
         has_result = 'result' in parsed and parsed['result'] is not None
 
         if has_error and has_result:
-            raise ValueError('expected either `error` or `result` to be present, not both')
+            raise ParseError(f'{body=} must contain either `error` or `result`, found both')
         elif has_error:
             response_type = JsonRpcResponseType.ERROR
         elif has_result:
             response_type = JsonRpcResponseType.RESULT
         else:
-            raise ValueError('expected `error` or `result` to be present, found neither')
+            raise ParseError(f'{body=} must contain either `error` or `result`, found neither')
 
         obj = parsed[response_type.value]
         if 'faultCode' not in obj or type(obj['faultCode']) is not int:
-            raise ValueError('expected to find integer `faultCode`')
+            raise ParseError(f'{body=} must contain int `faultCode`')
 
         fault_code = obj.pop('faultCode')
 
         if 'faultString' in obj:
             if type(obj['faultString']) is not str:
-                raise ValueError('found non-string `faultString`')
+                raise ParseError(f'{body=} must contain string `faultString`')
             fault_string = obj.pop('faultString')
         else:
             fault_string = ''
@@ -162,4 +174,4 @@ def _parse_version(version: str) -> JsonRpcVersion:
     if version == '2.0':
         return JsonRpcVersion.V20
     else:
-        raise ValueError(f'invalid `version`, expected one of [1.1, 2.0]: {version}')
+        raise ParseError(f'{version=} must be one of [1.1, 2.0]')
