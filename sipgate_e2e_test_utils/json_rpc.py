@@ -12,6 +12,7 @@ class ParseError(SyntaxError):
 
 
 class JsonRpcVersion(Enum):
+    """Valid JSON-RPC versions."""
     V11 = '1.1'
     V20 = '2.0'
 
@@ -19,7 +20,7 @@ class JsonRpcVersion(Enum):
 class JsonRpcRequest:
     """
     Encapsulates parsing/serialization logic for sipgate JSON-RPC requests.
-    Valid JSON-RPC versions are V1.1 and V2.0. These govern how an empty `params` field is (de-)serialized (<null> vs {}).
+    The request version governs how an empty `params` field is (de-)serialized (<null> for V1.1 vs {} for V2.0).
     When using the RpcRequest in python code, the empty `params` field will always be {} to enable simpler test assertions.
     """
 
@@ -40,22 +41,21 @@ class JsonRpcRequest:
     @staticmethod
     def parse(body: str | bytes) -> 'JsonRpcRequest':
         try:
-            parsed = json.loads(body)
+            json_body = json.loads(body)
         except JSONDecodeError:
             raise ParseError(f'{body=} must be valid JSON')
 
         try:
-            method_name = parsed['method']
-            params = parsed['params']
-            version_str = parsed['jsonrpc']
-            id = parsed['id']
+            method_name = json_body['method']
+            params = json_body['params']
+            id = json_body['id']
         except KeyError:
-            raise ParseError(f'{body=} must contain keys `method`, `params`, `id` and `jsonrpc`')
+            raise ParseError(f'{body=} must contain keys `method`, `params` and `id`')
 
         if type(method_name) is not str or method_name == '':
             raise ParseError(f'{method_name=} must be non-empty string')
 
-        version = _parse_version(version_str)
+        version = _parse_request_version(json_body)
 
         if version == JsonRpcVersion.V11 and params is None:
             raise ParseError(f'{params=} must NOT be <null> when using JSON-RPC V1.1')
@@ -66,12 +66,18 @@ class JsonRpcRequest:
         return JsonRpcRequest(version, method_name, params, id)
 
     def json(self) -> dict:
-        return {
-            'jsonrpc': self.version.value,
+        fields = {
             'id': self.id,
             'method': self.method,
             'params': None if (self.params == {} and self.version == JsonRpcVersion.V20) else self.params
         }
+
+        if self.version == JsonRpcVersion.V11:
+            fields['version'] = self.version.value
+        elif self.version == JsonRpcVersion.V20:
+            fields['jsonrpc'] = self.version.value
+
+        return fields
 
     def serialize(self) -> str:
         return json.dumps(self.json())
@@ -86,7 +92,7 @@ class JsonRpcResponseType(Enum):
 class JsonRpcResponse:
     """
     Encapsulates parsing/serialization logic for sipgate JSON-RPC responses.
-    Usually V1.1 is used as JSON-RPC version for responses.
+    Usually V1.1 is used as JSON-RPC version for responses, but it is sometimes omitted.
     When using the RpcResponse in python code, an empty `result` field will always be {} (therefore excluding `faultCode` and `faultString`) to enable simpler test assertions.
     It is recommended, to use the result() and error() methods to ensure construction of valid responses.
     """
@@ -108,15 +114,15 @@ class JsonRpcResponse:
     @staticmethod
     def parse(body: str | bytes) -> 'JsonRpcResponse':
         try:
-            parsed = json.loads(body)
+            parsed_body = json.loads(body)
         except JSONDecodeError:
             raise ParseError(f'{body=} must be valid JSON')
 
-        id = parsed['id'] if 'id' in parsed else None
-        version = _parse_version(parsed['version']) if 'version' in parsed else None
+        id = parsed_body['id'] if 'id' in parsed_body else None
+        version = _parse_response_version(parsed_body)
 
-        has_error = 'error' in parsed and parsed['error'] is not None
-        has_result = 'result' in parsed and parsed['result'] is not None
+        has_error = 'error' in parsed_body and parsed_body['error'] is not None
+        has_result = 'result' in parsed_body and parsed_body['result'] is not None
 
         if has_error and has_result:
             raise ParseError(f'{body=} must contain either `error` or `result`, found both')
@@ -127,7 +133,7 @@ class JsonRpcResponse:
         else:
             raise ParseError(f'{body=} must contain either `error` or `result`, found neither')
 
-        obj = parsed[response_type.value]
+        obj = parsed_body[response_type.value]
         if 'faultCode' not in obj or type(obj['faultCode']) is not int:
             raise ParseError(f'{body=} must contain int `faultCode`')
 
@@ -156,8 +162,10 @@ class JsonRpcResponse:
         if self.id:
             fields['id'] = self.id
 
-        if self.version:
+        if self.version == JsonRpcVersion.V11:
             fields['version'] = self.version.value
+        elif self.version == JsonRpcVersion.V20:
+            fields['jsonrpc'] = self.version.value
 
         return fields
 
@@ -168,10 +176,31 @@ class JsonRpcResponse:
         return f"<{self.__class__.__name__} type={self.type} fault={self.fault} members={self.members} version='{self.version}' id='{self.id}'>"
 
 
-def _parse_version(version: str) -> JsonRpcVersion:
-    if version == '1.1':
+def _parse_request_version(json_body: dict[str, Any]) -> JsonRpcVersion:
+    has_jsonrpc_field = 'jsonrpc' in json_body
+    has_version_field = 'version' in json_body
+
+    if has_jsonrpc_field and has_version_field:
+        raise ParseError(f'{json_body=} must either contain `jsonrpc=2.0` or `version=1.1`')
+    elif has_version_field and json_body['version'] == '1.1':
         return JsonRpcVersion.V11
-    if version == '2.0':
+    elif has_jsonrpc_field and json_body['jsonrpc'] == '2.0':
         return JsonRpcVersion.V20
     else:
-        raise ParseError(f'{version=} must be one of [1.1, 2.0]')
+        raise ParseError(f'{json_body=} must either contain `jsonrpc=2.0` or `version=1.1`')
+
+
+def _parse_response_version(json_body: dict[str, Any]) -> JsonRpcVersion | None:
+    has_jsonrpc_field = 'jsonrpc' in json_body
+    has_version_field = 'version' in json_body
+
+    if not has_version_field and not has_jsonrpc_field:
+        return None
+    elif has_jsonrpc_field and has_version_field:
+        raise ParseError(f'{json_body=} must either contain `jsonrpc=2.0` or `version=1.1` or neither of those')
+    elif has_version_field and json_body['version'] == '1.1':
+        return JsonRpcVersion.V11
+    elif has_jsonrpc_field and json_body['jsonrpc'] == '2.0':
+        return JsonRpcVersion.V20
+    else:
+        raise ParseError(f'{json_body=} must either contain `jsonrpc=2.0` or `version=1.1` or neither of those')

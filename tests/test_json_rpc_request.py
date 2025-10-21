@@ -22,18 +22,33 @@ class TestJsonRpcRequest(TestCase):
             }))
 
     def test_parse_fails_invalid_version(self):
-        with self.assertRaises(ParseError):
-            JsonRpcRequest.parse(json.dumps({
-                'jsonrpc': '4.2',
-                'id': '42',
-                'method': 'a_method_name',
-                'params': {}
-            }))
+        invalid_versions = [{
+            'version': '2.0',
+        }, {
+            'version': '1.4'
+        }, {
+            'jsonrpc': '1.1'
+        }, {
+            'jsonrpc': '4.2'
+        }, {
+            'version': '1.1',
+            'jsonrpc': '2.0'
+        }]
+
+        for v in invalid_versions:
+            with self.subTest(v):
+                with self.assertRaises(ParseError):
+                    JsonRpcRequest.parse(json.dumps({
+                        **v,
+                        'id': '42',
+                        'method': 'a_method_name',
+                        'params': {}
+                    }))
 
     def test_parse_fails_missing_id(self):
         with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
-                'jsonrpc': '1.1',
+                'version': '1.1',
                 'method': 'a_method_name',
                 'params': {}
             }))
@@ -41,7 +56,7 @@ class TestJsonRpcRequest(TestCase):
     def test_parse_fails_missing_method_name(self):
         with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
-                'jsonrpc': '1.1',
+                'version': '1.1',
                 'id': '42',
                 'params': {}
             }))
@@ -49,7 +64,7 @@ class TestJsonRpcRequest(TestCase):
     def test_parse_fails_empty_method_name(self):
         with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
-                'jsonrpc': '1.1',
+                'version': '1.1',
                 'id': '42',
                 'method': '',
                 'params': {}
@@ -58,7 +73,7 @@ class TestJsonRpcRequest(TestCase):
     def test_parse_fails_non_string_method_name(self):
         with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
-                'jsonrpc': '1.1',
+                'version': '1.1',
                 'id': '42',
                 'method': 123,
                 'params': {}
@@ -67,14 +82,14 @@ class TestJsonRpcRequest(TestCase):
     def test_parse_fails_missing_params(self):
         with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
-                'jsonrpc': '1.1',
+                'version': '1.1',
                 'id': '42',
             }))
 
     def test_parse_fails_empty_params_1_1(self):
         with self.assertRaises(ParseError):
             JsonRpcRequest.parse(json.dumps({
-                'jsonrpc': '1.1',
+                'version': '1.1',
                 'id': '42',
                 'method': 'a_method_name',
                 'params': None
@@ -82,7 +97,7 @@ class TestJsonRpcRequest(TestCase):
 
     def test_parse_succeeds_empty_params_1_1(self):
         request = JsonRpcRequest.parse(json.dumps({
-            'jsonrpc': '1.1',
+            'version': '1.1',
             'id': '42',
             'method': 'a_method_name',
             'params': {}
@@ -135,12 +150,16 @@ class TestJsonRpcRequest(TestCase):
         self.assertEqual(42, request.params['a_number'])
 
     def test_to_json_empty_params_1_1(self):
-        request = JsonRpcRequest(JsonRpcVersion.V11, 'a_method_name')
-        self.assertEqual({}, request.json()['params'])
+        request = JsonRpcRequest(JsonRpcVersion.V11, 'a_method_name').json()
+        self.assertNotIn('jsonrpc', request)
+        self.assertEqual('1.1', request['version'])
+        self.assertEqual({}, request['params'])
 
     def test_to_json_empty_params_2_0(self):
-        request = JsonRpcRequest(JsonRpcVersion.V20, 'a_method_name')
-        self.assertEqual(None, request.json()['params'])
+        request = JsonRpcRequest(JsonRpcVersion.V20, 'a_method_name').json()
+        self.assertNotIn('version', request)
+        self.assertEqual('2.0', request['jsonrpc'])
+        self.assertEqual(None, request['params'])
 
     def test_to_json(self):
         request = JsonRpcRequest(JsonRpcVersion.V20, 'a_method_name', {

@@ -51,11 +51,26 @@ class TestJsonRpcResponse(TestCase):
             }))
 
     def test_parse_fails_invalid_version(self):
-        with self.assertRaises(ParseError):
-            JsonRpcResponse.parse(json.dumps({
-                'version': '4.2',
-                'result': _fault(200, '')
-            }))
+        invalid_versions = [{
+            'version': '2.0',
+        }, {
+            'version': '1.4'
+        }, {
+            'jsonrpc': '1.1'
+        }, {
+            'jsonrpc': '4.2'
+        }, {
+            'version': '1.1',
+            'jsonrpc': '2.0'
+        }]
+
+        for v in invalid_versions:
+            with self.subTest(v):
+                with self.assertRaises(ParseError):
+                    JsonRpcResponse.parse(json.dumps({
+                        **v,
+                        'result': _fault(200, '')
+                    }))
 
     def test_parse_fails_both_result_and_error_present(self):
         with self.assertRaises(ParseError):
