@@ -1,7 +1,7 @@
 import json
 from unittest import TestCase
 
-from sipgate_e2e_test_utils.json_rpc import JsonRpcRequest, JsonRpcVersion, ParseError
+from sipgate_e2e_test_utils.json_rpc import JsonRpcRequest, ParseError, V11, V20
 
 
 class TestJsonRpcRequest(TestCase):
@@ -103,7 +103,7 @@ class TestJsonRpcRequest(TestCase):
             'params': {}
         }))
 
-        self.assertEqual(JsonRpcVersion.V11, request.version)
+        self.assertEqual(V11, request.version)
         self.assertEqual('42', request.id)
         self.assertEqual('a_method_name', request.method)
         self.assertEqual({}, request.params)
@@ -125,7 +125,7 @@ class TestJsonRpcRequest(TestCase):
             'params': None
         }))
 
-        self.assertEqual(JsonRpcVersion.V20, request.version)
+        self.assertEqual(V20, request.version)
         self.assertEqual('42', request.id)
         self.assertEqual('a_method_name', request.method)
         self.assertEqual({}, request.params)
@@ -142,7 +142,7 @@ class TestJsonRpcRequest(TestCase):
             }
         }))
 
-        self.assertEqual(JsonRpcVersion.V20, request.version)
+        self.assertEqual(V20, request.version)
         self.assertEqual('a_random_id', request.id)
         self.assertEqual('a_method_name', request.method)
         self.assertEqual('the_string_value', request.params['a_string'])
@@ -150,19 +150,19 @@ class TestJsonRpcRequest(TestCase):
         self.assertEqual(42, request.params['a_number'])
 
     def test_to_json_empty_params_1_1(self):
-        request = JsonRpcRequest(JsonRpcVersion.V11, 'a_method_name').json()
+        request = JsonRpcRequest(V11, 'a_method_name').json()
         self.assertNotIn('jsonrpc', request)
         self.assertEqual('1.1', request['version'])
         self.assertEqual({}, request['params'])
 
     def test_to_json_empty_params_2_0(self):
-        request = JsonRpcRequest(JsonRpcVersion.V20, 'a_method_name').json()
+        request = JsonRpcRequest(V20, 'a_method_name').json()
         self.assertNotIn('version', request)
         self.assertEqual('2.0', request['jsonrpc'])
         self.assertEqual(None, request['params'])
 
     def test_to_json(self):
-        request = JsonRpcRequest(JsonRpcVersion.V20, 'a_method_name', {
+        request = JsonRpcRequest(V20, 'a_method_name', {
             'a_string': 'the_string_value',
             'a_boolean': True,
             'a_number': 42

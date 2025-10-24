@@ -17,6 +17,11 @@ class JsonRpcVersion(Enum):
     V20 = '2.0'
 
 
+# convenience shorthands for omitting `JsonRpcVersion.`
+V11 = JsonRpcVersion.V11
+V20 = JsonRpcVersion.V20
+
+
 class JsonRpcRequest:
     """
     Encapsulates parsing/serialization logic for sipgate JSON-RPC requests.

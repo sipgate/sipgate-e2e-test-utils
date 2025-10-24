@@ -1,7 +1,7 @@
 import json
 from unittest import TestCase
 
-from sipgate_e2e_test_utils.json_rpc import JsonRpcResponse, JsonRpcVersion, JsonRpcResponseType, ParseError
+from sipgate_e2e_test_utils.json_rpc import JsonRpcResponse, JsonRpcResponseType, ParseError, V11
 
 
 class TestJsonRpcResponse(TestCase):
@@ -126,7 +126,7 @@ class TestJsonRpcResponse(TestCase):
             'result': None
         }))
 
-        self.assertEqual(JsonRpcVersion.V11, response.version)
+        self.assertEqual(V11, response.version)
         self.assertEqual('any_id', response.id)
         self.assertEqual((427, 'an error'), response.fault)
         self.assertEqual({}, response.members)
@@ -144,7 +144,7 @@ class TestJsonRpcResponse(TestCase):
             'error': None
         }))
 
-        self.assertEqual(JsonRpcVersion.V11, response.version)
+        self.assertEqual(V11, response.version)
         self.assertEqual((200, ''), response.fault)
         self.assertEqual('any_id', response.id)
         self.assertEqual('the_string_value', response.members['a_string'])
@@ -152,7 +152,7 @@ class TestJsonRpcResponse(TestCase):
         self.assertEqual(42, response.members['a_number'])
 
     def test_to_json_error_response(self):
-        request = JsonRpcResponse.error(400, 'an_error',  JsonRpcVersion.V11, 'an_id')
+        request = JsonRpcResponse.error(400, 'an_error',  V11, 'an_id')
 
         self.assertDictEqual({
             'version': '1.1',
@@ -169,7 +169,7 @@ class TestJsonRpcResponse(TestCase):
             'a_string': 'the_string_value',
             'a_boolean': True,
             'a_number': 42
-        }, JsonRpcVersion.V11, 'an_id')
+        }, V11, 'an_id')
 
         self.assertDictEqual({
             'version': '1.1',
