@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2025-12-04
+
+### Added
+
+- prometheus-style metrics parser (#ddc3b2c)
+
 ## [3.0.0] - 2025-10-24
 
 ### Fixed
@@ -77,6 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added [http-request-recorder](https://github.com/sipgate/http-request-recorder) matchers for XML/JSON RPC requests (#5edb323).
 - added sipgate-flavoured XML RPC request/response parsing/serialization (#58f6a75).
 
+[3.1.0]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v2.0.1...v3.0.0
 [2.0.1]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v1.3.0...v2.0.0
