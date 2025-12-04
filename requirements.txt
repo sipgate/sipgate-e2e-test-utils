@@ -1,3 +1,4 @@
 http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main
 SQLAlchemy~=2.0.43
 pre-commit
+prometheus-client~=0.23.1
