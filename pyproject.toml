@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sipgate_e2e_test_utils"
-version = "3.1.1"
+version = "4.0.0"
 authors = []
 description = "A library for common utils used in E2E testing (XML-, JSON-RPC, awaiting assertions, JobD helpers)"
 readme = "README.md"
