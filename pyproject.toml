@@ -16,11 +16,26 @@ classifiers = [
 license = "Apache-2.0"
 license-files = ["LICEN[CS]E*"]
 
-dependencies = [
-    "http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main",
-    "SQLAlchemy~=2.0.43",
-    "prometheus-client~=0.23.1",
+dependencies = []
+
+[project.optional-dependencies]
+jobd = [
+    "http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main"
+]
+rpc_matchers = [
+    "http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main"
+]
+db = [
+    "SQLAlchemy~=2.0.43"
+]
+metrics = [
+    "prometheus-client~=0.23.1"
+]
+dev = [
     "pre-commit",
+]
+all = [
+    "sipgate_e2e_test_utils[jobd,rpc_matchers,db,metrics,dev]"
 ]
 
 [tool.setuptools.package-data]
