@@ -16,6 +16,13 @@ classifiers = [
 license = "Apache-2.0"
 license-files = ["LICEN[CS]E*"]
 
+dependencies = [
+    "http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main",
+    "SQLAlchemy~=2.0.43",
+    "prometheus-client~=0.23.1",
+    "pre-commit",
+]
+
 [tool.setuptools.package-data]
 sipgate_e2e_test_utils = ["jobd_functions.xml"]
 
