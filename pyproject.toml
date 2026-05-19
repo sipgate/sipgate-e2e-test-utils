@@ -20,10 +20,10 @@ dependencies = []
 
 [project.optional-dependencies]
 jobd = [
-    "http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main"
+    "http_request_recorder @ https://github.com/sipgate/http-request-recorder/archive/96a89cef0b71faab11121af5b28a60aeb887af5a.zip"
 ]
 rpc_matchers = [
-    "http_request_recorder @ git+https://github.com/sipgate/http-request-recorder.git@main"
+    "http_request_recorder @ https://github.com/sipgate/http-request-recorder/archive/96a89cef0b71faab11121af5b28a60aeb887af5a.zip"
 ]
 db = [
     "SQLAlchemy~=2.0.43"
@@ -33,9 +33,6 @@ metrics = [
 ]
 dev = [
     "pre-commit",
-]
-all = [
-    "sipgate_e2e_test_utils[jobd,rpc_matchers,db,metrics,dev]"
 ]
 
 [tool.setuptools.package-data]
