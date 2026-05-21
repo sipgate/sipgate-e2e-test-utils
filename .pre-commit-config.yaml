@@ -1,11 +1,12 @@
+# pre-commit autoupdate --freeze
 repos:
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.12.10'
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: '5e2fb545eba1ea9dc051f6f962d52fe8f76a9794'  # frozen: v0.15.13
     hooks:
       - id: ruff
         args: ['--fix']
 
   - repo: https://github.com/hhatto/autopep8
-    rev: 'v2.3.2'
+    rev: '4046ad49e25b7fa1db275bf66b1b7d60600ac391'  # frozen:  v2.3.2
     hooks:
       - id: autopep8

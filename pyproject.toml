@@ -20,10 +20,10 @@ dependencies = []
 
 [project.optional-dependencies]
 jobd = [
-    "http_request_recorder @ https://github.com/sipgate/http-request-recorder/archive/96a89cef0b71faab11121af5b28a60aeb887af5a.zip"
+    "http_request_recorder @ https://github.com/sipgate/http-request-recorder/archive/bf99fe64fd67db9df845be0e8da7e2601d9c8eef.zip"
 ]
 rpc_matchers = [
-    "http_request_recorder @ https://github.com/sipgate/http-request-recorder/archive/96a89cef0b71faab11121af5b28a60aeb887af5a.zip"
+    "http_request_recorder @ https://github.com/sipgate/http-request-recorder/archive/bf99fe64fd67db9df845be0e8da7e2601d9c8eef.zip"
 ]
 db = [
     "SQLAlchemy~=2.0.43"
