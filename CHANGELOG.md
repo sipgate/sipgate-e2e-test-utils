@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-06-26
+
+### Added/Changed
+
+- Added kafka helpers used in multiple projects (#86e6925)
+
 ## [4.1.0] - 2026-05-29
 
 ### Added/Changed
@@ -101,6 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added [http-request-recorder](https://github.com/sipgate/http-request-recorder) matchers for XML/JSON RPC requests (#5edb323).
 - added sipgate-flavoured XML RPC request/response parsing/serialization (#58f6a75).
 
+[4.2.0]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v3.1.1...v4.0.0
 [3.1.1]: https://github.com/sipgate/sipgate-e2e-test-utils/compare/v3.1.0...v3.1.1
