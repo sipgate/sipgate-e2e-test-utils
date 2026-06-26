@@ -31,6 +31,9 @@ db = [
 metrics = [
     "prometheus-client~=0.23.1"
 ]
+kafka = [
+    "confluent-kafka~=2.10.0"
+]
 dev = [
     "pre-commit",
 ]
