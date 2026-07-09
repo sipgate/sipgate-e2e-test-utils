@@ -26,13 +26,13 @@ rpc_matchers = [
     "http_request_recorder @ https://github.com/sipgate/http-request-recorder/archive/bf99fe64fd67db9df845be0e8da7e2601d9c8eef.zip"
 ]
 db = [
-    "SQLAlchemy~=2.0.43"
+    "SQLAlchemy>=2.0.43,<3"
 ]
 metrics = [
-    "prometheus-client~=0.23.1"
+    "prometheus-client>=0.23.1,<1"
 ]
 kafka = [
-    "confluent-kafka~=2.10.0"
+    "confluent-kafka>=2.10.0,<3"
 ]
 dev = [
     "pre-commit",
