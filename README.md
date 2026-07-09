@@ -6,17 +6,17 @@ This is a Python library for common utils used in sipgate-specific E2E testing (
 In order to include this module in your project, add e.g.
 
 ```requirements
-sipgate_e2e_test_utils @ git+https://github.com/sipgates/sipgate-e2e-test-utils.git@main
+sipgate_e2e_test_utils @ git+https://github.com/sipgates/sipgate-e2e-test-utils.git@vX.X.X
 ```
 
 to your `requirements.txt`.
-This will only allow you to use certain features like waiting utilities and RPC request/response parsing/serialization. 
+This will only allow you to use certain features like waiting utilities and RPC request/response parsing/serialization.
 
 Other features, which require additional dependencies to be installed, can be enabled by using "extras".
 For example, to activate the `jobd` and `metrics` features, add:
 
 ```requirements
-sipgate_e2e_test_utils[jobd,metrics] @ git+https://github.com/sipgates/sipgate-e2e-test-utils.git@main
+sipgate_e2e_test_utils[jobd,metrics] @ git+https://github.com/sipgates/sipgate-e2e-test-utils.git@vX.X.X
 ```
 
 ### Available extras
