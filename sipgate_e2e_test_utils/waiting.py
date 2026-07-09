@@ -1,10 +1,11 @@
 import asyncio
+import inspect
 from datetime import timedelta
-from typing import Callable, Any
+from typing import Callable, Awaitable
 
 
 async def wait_for_condition(
-        condition: Callable[[], bool], attempts: int = 5, interval: timedelta = timedelta(milliseconds=100)) -> None:
+        condition: Callable[[], bool | Awaitable[bool]], attempts: int = 5, interval: timedelta = timedelta(milliseconds=100)) -> None:
     if attempts < 1:
         raise ValueError('needs at least one attempt')
 
@@ -12,7 +13,14 @@ async def wait_for_condition(
         raise ValueError('interval cannot be negative')
 
     attempt = 1
-    while condition() is False:
+
+    async def check_condition() -> bool:
+        if inspect.iscoroutinefunction(condition):
+            return await condition()
+        else:
+            return condition()
+
+    while await check_condition() is False:
         attempt += 1
 
         if attempt > attempts:
@@ -22,7 +30,7 @@ async def wait_for_condition(
 
 
 async def wait_for_assertions(
-        asserter: Callable[[], Any], attempts: int = 5, interval: timedelta = timedelta(milliseconds=100)) -> None:
+        asserter: Callable[[], None | Awaitable[None]], attempts: int = 5, interval: timedelta = timedelta(milliseconds=100)) -> None:
     if attempts < 1:
         raise ValueError('needs at least one attempt')
 
@@ -32,7 +40,10 @@ async def wait_for_assertions(
     attempt = 1
     while True:
         try:
-            asserter()
+            if inspect.iscoroutinefunction(asserter):
+                await asserter()
+            else:
+                asserter()
         except AssertionError as e:
             attempt += 1
 
