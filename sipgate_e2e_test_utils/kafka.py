@@ -1,7 +1,6 @@
-import asyncio
 from datetime import date, datetime
 
-from confluent_kafka import Producer, Consumer, TopicPartition, cimpl
+from confluent_kafka import Producer, Consumer, cimpl
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 from confluent_kafka.serialization import SerializationContext, MessageField
@@ -61,23 +60,6 @@ def publish_avro_record(schema_registry_client: SchemaRegistryClient, producer: 
     )
 
     producer.flush()
-
-
-async def likely_latest_msg_offset(consumer: Consumer, topic: str) -> int:
-    offset = -1
-    unchanged_for_iterations = 0
-    while unchanged_for_iterations < 20:
-        last_offset = offset
-        _, high_watermark_offset = consumer.get_watermark_offsets(TopicPartition(topic, 0), timeout=1.0)
-        # wierdly the high watermark offset is offset + 1
-        offset = high_watermark_offset - 1
-
-        if last_offset == offset:
-            unchanged_for_iterations += 1
-
-        await asyncio.sleep(0.500)
-
-    return offset
 
 
 def consume(consumer: Consumer, msg_count: int) -> list[cimpl.Message]:
